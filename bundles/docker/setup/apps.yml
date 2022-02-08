@@ -1,0 +1,4 @@
+PyWebVue: # Default app under /index.html
+  app: trame-ai-lenet-5
+trame-ai-lenet-5: # /trame-ai-lenet-5.html
+  app: trame-ai-lenet-5
