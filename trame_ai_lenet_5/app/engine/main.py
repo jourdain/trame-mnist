@@ -1,4 +1,6 @@
 import os
+import base64
+import random
 import asyncio
 from pathlib import Path
 
@@ -13,6 +15,8 @@ from trame import state, controller as ctrl
 MODEL_PATH = Path(ml.DATA_DIR, "model_lenet-5.trained").resolve().absolute()
 MULTI_PROCESS_MANAGER = multiprocessing.Manager()
 PENDING_TASKS = []
+CURRENT_INPUT = None
+ML_MODEL = None
 
 # -----------------------------------------------------------------------------
 # Initial state
@@ -29,13 +33,15 @@ state.update(
             "validation_accuracy": [],
             "validation_loss": [],
         },
+        "prediction_results": [],
     }
 )
 
 
-def initialize():
+def initialize(**kwargs):
     if MODEL_PATH.exists() and state.epoch_end == 0:
         asyncio.create_task(run_training())
+    update_prediction_input()
 
 
 # -----------------------------------------------------------------------------
@@ -62,6 +68,9 @@ async def run_training():
     # Only join on monitor task
     PENDING_TASKS.append(task_monitor)
 
+    global ML_MODEL
+    ML_MODEL = None
+
 
 # -----------------------------------------------------------------------------
 
@@ -80,6 +89,53 @@ def reset_training():
         "validation_loss": [],
     }
 
+    global ML_MODEL
+    ML_MODEL = None
+
+
+# -----------------------------------------------------------------------------
+
+
+def update_prediction_input():
+    global CURRENT_INPUT
+    ds = ml.TEST_DATASET
+    size = len(ds)
+    image, label_nb = ds[random.randint(0, size - 1)]
+    image_path = Path(f"{ml.DATA_DIR}/{label_nb}.jpg")
+    image.save(image_path)
+    with open(image_path, "rb") as file:
+        data = base64.encodebytes(file.read()).decode("utf-8")
+        state.prediction_input_url = f"data:image/jpeg;base64,{data}"
+
+    CURRENT_INPUT = image
+    run_prediction()
+
+
+# -----------------------------------------------------------------------------
+
+
+def get_prediction_model():
+    global ML_MODEL
+    if ML_MODEL is not None:
+        return ML_MODEL
+
+    ML_MODEL = ml.get_trained_model(MODEL_PATH)
+    return ML_MODEL
+
+
+# -----------------------------------------------------------------------------
+
+
+def run_prediction():
+    model = get_prediction_model()
+
+    if model:
+        result = model.predict(CURRENT_INPUT)
+        result = result[0].tolist()
+
+        ctrl.chart_pred_update(charts.prediction_chart(result))
+        state.prediction_results = result
+
 
 # -----------------------------------------------------------------------------
 # State listeners
@@ -91,13 +147,3 @@ def update_charts(model_state, **kwargs):
     acc, loss = charts.acc_loss_charts(model_state)
     ctrl.chart_acc_update(acc)
     ctrl.chart_loss_update(loss)
-
-
-# -----------------------------------------------------------------------------
-# Debug to check that server is not busy...
-# -----------------------------------------------------------------------------
-
-
-@state.change("slider_value")
-def monitor_slider(slider_value, **kwargs):
-    print(slider_value)

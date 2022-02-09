@@ -10,11 +10,13 @@ DATA_DIR = str(
     Path(Path(__file__).parent.parent.parent.parent, "data").resolve().absolute()
 )
 
+TRANSFORM = transforms.Compose(
+    [transforms.ToTensor(), transforms.Normalize((0,), (1,))]
+)
+
 
 def create_dataset_loaders(batch_size):
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0,), (1,))]
-    )
+    transform = TRANSFORM
 
     training_set = torchvision.datasets.MNIST(
         root=DATA_DIR,
@@ -84,7 +86,7 @@ class LeNet5(nn.Module):
 
 
 class Model:
-    def __init__(self, model, learning_rate):
+    def __init__(self, model, learning_rate=1e-5):
         self.model = model
         self.lr = learning_rate
         self.loss = nn.CrossEntropyLoss()
@@ -162,6 +164,12 @@ class Model:
         }
         torch.save(data, output_path)
 
+    def predict(self, image):
+        self.model.eval()
+        tensor = TRANSFORM(image)
+        tensor = torch.reshape(tensor, (1, *tensor.shape))
+        return self.model(tensor)
+
     @property
     def metadata(self):
         return {
@@ -179,6 +187,27 @@ class Model:
         self.val_acc = value.get("validation_accuracy")
         self.val_loss = value.get("validation_loss")
         self.epoch = value.get("epoch")
+
+
+# -----------------------------------------------------------------------------
+# External API
+# -----------------------------------------------------------------------------
+
+TEST_DATASET = torchvision.datasets.MNIST(
+    root=DATA_DIR,
+    train=False,
+    download=True,
+)
+
+
+def get_trained_model(path_to_use):
+    if not Path(path_to_use).exists():
+        return None
+
+    lenet5 = LeNet5()
+    model = Model(lenet5)
+    model.load(path_to_use)
+    return model
 
 
 def train_model(path_to_use, queue, end_epoch, learning_rate=1e-5, batch=32):

@@ -10,15 +10,8 @@ layout = SinglePage("AI LeNet-5", on_ready=ctrl.on_ready)
 layout.title.set_text("AI LeNet-5")
 with layout.toolbar as tb:
     tb.dense = True
-    vuetify.VSpacer()
 
-    # Debug to check that server is not busy...
-    vuetify.VSlider(
-        v_model=("slider_value", 0),
-        dense=True,
-        hide_details=True,
-        style="max-width: 150px;",
-    )
+    vuetify.VSpacer()
 
     with Div(v_show="view_mode === 'training'"):
         with vuetify.VBtn(
@@ -26,7 +19,7 @@ with layout.toolbar as tb:
             loading=("training_running",),
             disabled=("training_running",),
             classes="ml-4",
-            click=ctrl.start_training,
+            click=ctrl.training_add,
             style="overflow: hidden",
         ):
             with vuetify.Template(v_slot_loader=True):
@@ -43,7 +36,7 @@ with layout.toolbar as tb:
             "Reset",
             classes="ml-4",
             disabled=("training_running",),
-            click=ctrl.reset_training,
+            click=ctrl.training_reset,
         )
 
     vuetify.VDivider(vertical=True, classes="mx-4")
@@ -63,11 +56,43 @@ with layout.toolbar as tb:
 # Main content
 with layout.content:
     with vuetify.VContainer(fluid=True, classes="pa-0"):
-        with vuetify.VCol(v_show="view_mode == 'training'"):
+        with vuetify.VCol(v_if="view_mode == 'training'"):
             chart_acc = vega.VegaEmbed(name="chart_acc", style="width: 100%;")
             ctrl.chart_acc_update = chart_acc.update
             chart_loss = vega.VegaEmbed(name="chart_loss", style="width: 100%;")
             ctrl.chart_loss_update = chart_loss.update
+        with vuetify.VRow(v_if="view_mode == 'execution'", classes="pa-3 ma-2 "):
+            with vuetify.VCol(align_self="center", cols=4):
+                with vuetify.VRow(justify="center"):
+                    with Div(style="position: relative; flex: none; width: 200px;"):
+                        vuetify.VImg(
+                            src=("prediction_input_url", ""),
+                            max_width=200,
+                            min_width=200,
+                        )
+                        with vuetify.VBtn(
+                            fab=True,
+                            click=ctrl.prediction_update_input,
+                            style="position: absolute; right: -16px; top: -16px; z-index: 1;",
+                            # color="primary",
+                            x_small=True,
+                        ):
+                            vuetify.VIcon("mdi-autorenew")
+
+            with vuetify.VCol(align_self="center", cols=2):
+                with vuetify.VRow(justify="center"):
+                    with vuetify.VBtn(
+                        icon=True,
+                        click=ctrl.prediction_run,
+                        outlined=True,
+                    ):
+                        vuetify.VIcon("mdi-magic-staff")
+
+            with vuetify.VCol(align_self="center", cols=6):
+                chart_pred = vega.VegaEmbed(
+                    name="chart_prediction", style="width: 100%; display: flex;"
+                )
+                ctrl.chart_pred_update = chart_pred.update
 
 # Footer
 # layout.footer.hide()

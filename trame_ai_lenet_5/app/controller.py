@@ -4,5 +4,9 @@ from . import engine
 
 def on_start():
     ctrl.on_ready = engine.initialize
-    ctrl.start_training = engine.run_training
-    ctrl.reset_training = engine.reset_training
+
+    ctrl.training_add = engine.run_training
+    ctrl.training_reset = engine.reset_training
+
+    ctrl.prediction_update_input = engine.update_prediction_input
+    ctrl.prediction_run = engine.run_prediction

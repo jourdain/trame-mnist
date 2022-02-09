@@ -1,4 +1,5 @@
 import altair as alt
+import pandas as pd
 
 SERIES_ALL = [
     "training_accuracy",
@@ -98,3 +99,22 @@ def acc_loss_charts(model_state):
     acc = to_chart(model_state, series=SERIES_ACC, title="Accuracy", use_percent=True)
     loss = to_chart(model_state, series=SERIES_LOSS, title="Loss", use_percent=False)
     return acc, loss
+
+
+def prediction_chart(prediction_list):
+    df = pd.DataFrame(
+        {
+            "Score": prediction_list,
+            "Class": list(range(10)),
+        }
+    )
+    chart = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            x=alt.X("Score", axis=alt.Axis(title=None)),
+            y=alt.Y("Class:O", axis=alt.Axis(title="Labels"), sort="-x"),
+        )
+        .properties(width="container", height=200)
+    )
+    return chart
