@@ -1,7 +1,7 @@
 from typing import ValuesView
 from trame import state, controller as ctrl
 from trame.layouts import SinglePage
-from trame.html import vega, vuetify, Div
+from trame.html import vega, vuetify, Div, Span
 
 # Create single page layout type
 layout = SinglePage("AI LeNet-5", on_ready=ctrl.on_ready)
@@ -39,6 +39,15 @@ with layout.toolbar as tb:
             click=ctrl.training_reset,
         )
 
+    with Div(v_show="view_mode === 'execution'"):
+        with vuetify.VBtn(
+            icon=True,
+            small=True,
+            classes="ml-4",
+            click=ctrl.prediction_next_fail,
+        ):
+            vuetify.VIcon("mdi-shield-bug-outline")
+
     vuetify.VDivider(vertical=True, classes="mx-4")
 
     with vuetify.VBtnToggle(
@@ -65,30 +74,29 @@ with layout.content:
             with vuetify.VCol(align_self="center", cols=4):
                 with vuetify.VRow(justify="center"):
                     with Div(style="position: relative; flex: none; width: 200px;"):
-                        vuetify.VImg(
-                            src=("prediction_input_url", ""),
-                            max_width=200,
-                            min_width=200,
-                        )
                         with vuetify.VBtn(
                             fab=True,
                             click=ctrl.prediction_update_input,
                             style="position: absolute; right: -16px; top: -16px; z-index: 1;",
                             # color="primary",
                             x_small=True,
+                            color=("prediction_success ? 'green' : 'red'",),
                         ):
                             vuetify.VIcon("mdi-autorenew")
 
-            with vuetify.VCol(align_self="center", cols=2):
-                with vuetify.VRow(justify="center"):
-                    with vuetify.VBtn(
-                        icon=True,
-                        click=ctrl.prediction_run,
-                        outlined=True,
-                    ):
-                        vuetify.VIcon("mdi-magic-staff")
+                        with vuetify.VTooltip(bottom=True):
+                            with vuetify.Template(v_slot_activator="{ on, attrs }"):
+                                vuetify.VImg(
+                                    v_bind="attrs",
+                                    v_on="on",
+                                    src=("prediction_input_url", ""),
+                                    max_width=200,
+                                    min_width=200,
+                                    __properties=["v_bind", "v_on"],
+                                )
+                            Span("{{ prediction_label }}")
 
-            with vuetify.VCol(align_self="center", cols=6):
+            with vuetify.VCol(align_self="center", cols=8):
                 chart_pred = vega.VegaEmbed(
                     name="chart_prediction", style="width: 100%; display: flex;"
                 )

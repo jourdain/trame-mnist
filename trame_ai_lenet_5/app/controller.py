@@ -10,3 +10,4 @@ def on_start():
 
     ctrl.prediction_update_input = engine.update_prediction_input
     ctrl.prediction_run = engine.run_prediction
+    ctrl.prediction_next_fail = engine.find_next_fail

@@ -16,6 +16,7 @@ MODEL_PATH = Path(ml.DATA_DIR, "model_lenet-5.trained").resolve().absolute()
 MULTI_PROCESS_MANAGER = multiprocessing.Manager()
 PENDING_TASKS = []
 CURRENT_INPUT = None
+CURRENT_LABEL = 0
 ML_MODEL = None
 
 # -----------------------------------------------------------------------------
@@ -97,7 +98,7 @@ def reset_training():
 
 
 def update_prediction_input():
-    global CURRENT_INPUT
+    global CURRENT_INPUT, CURRENT_LABEL
     ds = ml.TEST_DATASET
     size = len(ds)
     image, label_nb = ds[random.randint(0, size - 1)]
@@ -108,6 +109,8 @@ def update_prediction_input():
         state.prediction_input_url = f"data:image/jpeg;base64,{data}"
 
     CURRENT_INPUT = image
+    CURRENT_LABEL = label_nb
+    state.prediction_label = label_nb
     run_prediction()
 
 
@@ -135,6 +138,19 @@ def run_prediction():
 
         ctrl.chart_pred_update(charts.prediction_chart(result))
         state.prediction_results = result
+        state.prediction_success = max(result) == result[CURRENT_LABEL]
+
+
+# -----------------------------------------------------------------------------
+
+
+async def find_next_fail():
+    update_prediction_input()
+
+    while state.prediction_success:
+        with state.monitor():
+            update_prediction_input()
+        await asyncio.sleep(0.05)
 
 
 # -----------------------------------------------------------------------------
