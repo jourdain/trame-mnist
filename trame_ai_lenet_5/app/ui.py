@@ -11,6 +11,7 @@ layout = SinglePage("AI LeNet-5")
 layout.title.set_text("AI LeNet-5")
 with layout.toolbar as tb:
     vuetify.VSpacer()
+    vuetify.VSlider(v_model=("slider_value", 0), dense=True, hide_details=True)
     vuetify.VProgressLinear(
         value=("100 * model_state.epoch / epoch_end",),
         absolute=True,

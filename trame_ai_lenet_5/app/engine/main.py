@@ -10,6 +10,7 @@ from trame import state
 from . import ml, utils
 
 MODEL_PATH = str(Path(ml.DATA_DIR, "model_lenet-5.trained").resolve().absolute())
+PENDING_TASKS = []
 
 # -----------------------------------------------------------------------------
 # Initial state
@@ -32,19 +33,23 @@ state.update(
 # Add epoch to training
 # -----------------------------------------------------------------------------
 async def run_training():
+    await asyncio.gather(*PENDING_TASKS)
+    PENDING_TASKS.clear()
+
     if state.model_state.get("epoch") >= state.epoch_end:
         state.epoch_end += 10
 
     m = multiprocessing.Manager()
     queue = m.Queue()
     loop = asyncio.get_event_loop()
-    monitor = asyncio.create_task(utils.monitor_state_queue(queue))
-    with ProcessPoolExecutor(1) as pool:
-        await loop.run_in_executor(
-            pool, partial(ml.train_model, MODEL_PATH, queue, state.epoch_end)
-        )
+    monitor = loop.create_task(utils.monitor_state_queue(queue))
+    training = loop.run_in_executor(
+        ProcessPoolExecutor(1),
+        partial(ml.train_model, MODEL_PATH, queue, state.epoch_end),
+    )
 
-    await monitor
+    PENDING_TASKS.append(monitor)
+    PENDING_TASKS.append(training)
 
 
 # -----------------------------------------------------------------------------
@@ -62,3 +67,8 @@ def reset_training():
         "validation_accuracy": [],
         "validation_loss": [],
     }
+
+
+@state.change("slider_value")
+def monitor_slider(slider_value, **kwargs):
+    print(slider_value)

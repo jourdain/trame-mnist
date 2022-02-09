@@ -1,7 +1,3 @@
-import os
-
-os.environ["WSLINK_HEART_BEAT"] = "0"
-
 from trame import setup_dev
 from . import controller, ui
 
