@@ -83,11 +83,8 @@ def reset_training():
 @state.change("model_state")
 def update_charts(model_state, **kwargs):
     acc, loss = chart_utils.acc_loss_charts(model_state)
-
     ctrl.chart_acc_update(acc)
     ctrl.chart_loss_update(loss)
-
-    state.flush("chart_acc", "chart_loss")
 
 
 # -----------------------------------------------------------------------------

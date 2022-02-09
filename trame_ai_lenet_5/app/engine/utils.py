@@ -17,12 +17,8 @@ async def monitor_state_queue(queue, training_task):
                     _process_running = False
             else:
                 # state update (dict)
-                state.update(msg)
-                state.flush(*list(msg.keys()))
-
-                for key in msg.keys():  # Hack
-                    callbacks = _app._change_callbacks.get(key, [])
-                    for fn in callbacks:
-                        fn(**_app.state)
+                with state.monitor():
+                    # Need to monitor as we are outside of client/server update
+                    state.update(msg)
 
     await training_task
