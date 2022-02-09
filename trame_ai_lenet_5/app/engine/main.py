@@ -6,12 +6,12 @@ import multiprocessing
 from functools import partial
 from concurrent.futures import ProcessPoolExecutor
 
-from . import ml, utils, chart_utils
-
-
+from . import ml, utils, charts
 from trame import state, controller as ctrl
 
-MODEL_PATH = str(Path(ml.DATA_DIR, "model_lenet-5.trained").resolve().absolute())
+
+MODEL_PATH = Path(ml.DATA_DIR, "model_lenet-5.trained").resolve().absolute()
+MULTI_PROCESS_MANAGER = multiprocessing.Manager()
 PENDING_TASKS = []
 
 # -----------------------------------------------------------------------------
@@ -32,6 +32,12 @@ state.update(
     }
 )
 
+
+def initialize():
+    if MODEL_PATH.exists() and state.epoch_end == 0:
+        asyncio.create_task(run_training())
+
+
 # -----------------------------------------------------------------------------
 # Methods to bound to UI
 # -----------------------------------------------------------------------------
@@ -45,16 +51,16 @@ async def run_training():
     if state.model_state.get("epoch") >= state.epoch_end:
         state.epoch_end += 10
 
-    m = multiprocessing.Manager()
-    queue = m.Queue()
     loop = asyncio.get_event_loop()
-
-    training = loop.run_in_executor(
+    queue = MULTI_PROCESS_MANAGER.Queue()
+    task_training = loop.run_in_executor(
         ProcessPoolExecutor(1),
         partial(ml.train_model, MODEL_PATH, queue, state.epoch_end),
     )
-    monitor = loop.create_task(utils.monitor_state_queue(queue, training))
-    PENDING_TASKS.append(monitor)
+    task_monitor = loop.create_task(utils.queue_to_state(queue, task_training))
+
+    # Only join on monitor task
+    PENDING_TASKS.append(task_monitor)
 
 
 # -----------------------------------------------------------------------------
@@ -82,7 +88,7 @@ def reset_training():
 
 @state.change("model_state")
 def update_charts(model_state, **kwargs):
-    acc, loss = chart_utils.acc_loss_charts(model_state)
+    acc, loss = charts.acc_loss_charts(model_state)
     ctrl.chart_acc_update(acc)
     ctrl.chart_loss_update(loss)
 

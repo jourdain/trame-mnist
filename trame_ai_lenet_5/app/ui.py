@@ -4,8 +4,7 @@ from trame.layouts import SinglePage
 from trame.html import vega, vuetify, Div
 
 # Create single page layout type
-# (FullScreenPage, SinglePage, SinglePageWithDrawer)
-layout = SinglePage("AI LeNet-5")
+layout = SinglePage("AI LeNet-5", on_ready=ctrl.on_ready)
 
 # Toolbar
 layout.title.set_text("AI LeNet-5")

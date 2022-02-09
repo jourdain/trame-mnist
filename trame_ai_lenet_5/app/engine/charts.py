@@ -47,7 +47,7 @@ def source_to_chart(source, title="value", height=300, use_percent=True):
         alt.Chart(source)
         .mark_line()
         .encode(
-            alt.X("epoch:O"),
+            alt.X("epoch:Q"),
             yAxis,
             color="Serie:N",
         )
@@ -57,7 +57,7 @@ def source_to_chart(source, title="value", height=300, use_percent=True):
         alt.Chart(source)
         .mark_point()
         .encode(
-            x="epoch:O",
+            x="epoch:Q",
             opacity=alt.value(0),
         )
         .add_selection(nearest)
@@ -78,7 +78,7 @@ def source_to_chart(source, title="value", height=300, use_percent=True):
         alt.Chart(source)
         .mark_rule(color="gray")
         .encode(
-            x="epoch:O",
+            x="epoch:Q",
         )
         .transform_filter(nearest)
     )

@@ -2,7 +2,7 @@ import asyncio
 from trame import state
 
 
-async def monitor_state_queue(queue, training_task):
+async def queue_to_state(queue, *tasks):
     _process_running = True
     while _process_running:
         if queue.empty():
@@ -19,4 +19,4 @@ async def monitor_state_queue(queue, training_task):
                     # state update (dict)
                     state.update(msg)
 
-    await training_task
+    await asyncio.gather(*tasks)
