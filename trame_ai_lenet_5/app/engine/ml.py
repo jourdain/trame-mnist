@@ -100,7 +100,7 @@ class Model:
         output = nn.functional.softmax(output, dim=1)
         output = output.argmax(1)
         acc = torch.sum(output == target) / output.shape[0]
-        return float(acc * 100)
+        return float(acc)
 
     def train_step(self, dataset):
         self.model.train()

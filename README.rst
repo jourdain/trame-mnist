@@ -34,6 +34,7 @@ venv creation for AI
 
 .. code-block:: console
 
+    # PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.9.9
     conda create --name lenet5 python=3.9
     conda activate lenet5
     conda install "pytorch==1.9.1" "torchvision==0.10.1" -c pytorch

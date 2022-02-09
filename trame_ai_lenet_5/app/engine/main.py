@@ -1,13 +1,15 @@
 import os
-from pathlib import Path
 import asyncio
+from pathlib import Path
+
+import multiprocessing
 from functools import partial
 from concurrent.futures import ProcessPoolExecutor
-import multiprocessing
-
-from trame import state
 
 from . import ml, utils
+
+import altair as alt
+from trame import state, controller as ctrl
 
 MODEL_PATH = str(Path(ml.DATA_DIR, "model_lenet-5.trained").resolve().absolute())
 PENDING_TASKS = []
@@ -72,3 +74,78 @@ def reset_training():
 @state.change("slider_value")
 def monitor_slider(slider_value, **kwargs):
     print(slider_value)
+
+
+@state.change("model_state")
+def update_chart(model_state, **kwargs):
+    source = []
+    for serie in [
+        "training_accuracy",
+        "training_loss",
+        "validation_accuracy",
+        "validation_loss",
+    ]:
+        values = model_state.get(serie)
+        for epoch, value in enumerate(values):
+            source.append(
+                {
+                    "serie": serie.replace("_", " "),
+                    "epoch": epoch + 1,
+                    "value": value,
+                }
+            )
+
+    source = alt.InlineData(values=source)
+
+    nearest = alt.selection(
+        type="single", nearest=True, on="mouseover", fields=["epoch"], empty="none"
+    )
+
+    line = (
+        alt.Chart(source)
+        .mark_line()
+        .encode(
+            alt.X("epoch:O"),
+            alt.Y("value:Q", axis=alt.Axis(format="%")),
+            color="serie:N",
+            tooltip=["epoch:O", "value:Q", "serie:N"],
+        )
+    )
+
+    selectors = (
+        alt.Chart(source)
+        .mark_point()
+        .encode(
+            x="epoch:O",
+            opacity=alt.value(0),
+        )
+        .add_selection(nearest)
+    )
+
+    # Draw points on the line, and highlight based on selection
+    points = line.mark_point().encode(
+        opacity=alt.condition(nearest, alt.value(1), alt.value(0))
+    )
+
+    # Draw text labels near the points, and highlight based on selection
+    text = line.mark_text(align="left", dx=10, dy=-10).encode(
+        text=alt.condition(nearest, "value:Q", alt.value(" ")),
+    )
+
+    # Draw a rule at the location of the selection
+    rules = (
+        alt.Chart(source)
+        .mark_rule(color="gray")
+        .encode(
+            x="epoch:O",
+        )
+        .transform_filter(nearest)
+    )
+
+    # Put the five layers into a chart and bind the data
+    chart = alt.layer(line, selectors, points, rules, text).properties(
+        width="container", height=300
+    )
+
+    ctrl.chart_update(chart)
+    state.flush("acc_loss")

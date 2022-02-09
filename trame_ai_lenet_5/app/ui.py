@@ -1,7 +1,6 @@
 from trame import state, controller as ctrl
 from trame.layouts import SinglePage
-from trame.html import vuetify, Div
-
+from trame.html import vega, vuetify, Div
 
 # Create single page layout type
 # (FullScreenPage, SinglePage, SinglePageWithDrawer)
@@ -37,22 +36,8 @@ with layout.toolbar as tb:
 # Main content
 with layout.content:
     with vuetify.VContainer(fluid=True, classes="pa-0 fill-height"):
-        Div(
-            "Accuracy {{(model_state.training_accuracy[model_state.training_accuracy.length - 1])?.toFixed(2)}}%"
-        )
-        vuetify.VSparkline(
-            value=("model_state.training_accuracy",),
-            fill=True,
-            line_width=1,
-        )
-        Div(
-            "Loss  {{(model_state.training_loss[model_state.training_loss.length - 1])?.toFixed(2)}} - {{ model_state.training_loss.length }}"
-        )
-        vuetify.VSparkline(
-            value=("model_state.training_loss",),
-            fill=True,
-            line_width=1,
-        )
+        html_chart = vega.VegaEmbed(name="acc_loss", style="width: 100%;")
+        ctrl.chart_update = html_chart.update
 
 # Footer
 # layout.footer.hide()
