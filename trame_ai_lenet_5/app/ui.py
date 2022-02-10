@@ -49,6 +49,15 @@ with layout.toolbar as tb:
         ):
             vuetify.VIcon("mdi-shield-bug-outline")
 
+        with vuetify.VBtn(
+            small=True,
+            classes="ml-4",
+            click=ctrl.xai_run,
+            disabled=("!prediction_available",),
+            icon=True,
+        ):
+            vuetify.VIcon("mdi-wizard-hat")
+
     vuetify.VDivider(vertical=True, classes="mx-4")
 
     with vuetify.VBtnToggle(

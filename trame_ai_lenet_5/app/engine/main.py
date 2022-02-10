@@ -118,6 +118,17 @@ async def prediction_next_failure():
 
 
 # -----------------------------------------------------------------------------
+
+
+def xai_run():
+    model, image = ml.prediction_xai_params()
+    result = ml.xai_update(model, image)
+    print(result)
+    print("=" * 60)
+    print(dir(result))
+
+
+# -----------------------------------------------------------------------------
 # State listeners
 # -----------------------------------------------------------------------------
 

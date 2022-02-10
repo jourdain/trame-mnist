@@ -10,3 +10,5 @@ def on_start():
 
     ctrl.prediction_update = engine.prediction_update
     ctrl.prediction_next_failure = engine.prediction_next_failure
+
+    ctrl.xai_run = engine.xai_run

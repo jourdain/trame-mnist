@@ -13,6 +13,8 @@ DATASET_TEST = torchvision.datasets.MNIST(
     download=True,
 )
 
+LAST_IMAGE = None
+
 
 def prediction_reload():
     global MODEL
@@ -32,4 +34,12 @@ def prediction_update():
         prediction = MODEL.predict(image)
         prediction = prediction[0].tolist()
 
+    # keep track of last input
+    global LAST_IMAGE
+    LAST_IMAGE = image
+
     return image, label, prediction
+
+
+def prediction_xai_params():
+    return MODEL, LAST_IMAGE
