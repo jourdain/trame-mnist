@@ -1,4 +1,5 @@
 import asyncio
+from .ml import prediction_reload
 from trame import state
 
 
@@ -20,3 +21,7 @@ async def queue_to_state(queue, *tasks):
                     state.update(msg)
 
     await asyncio.gather(*tasks)
+
+    # Make sure we can go to prediction
+    state.prediction_available = prediction_reload()
+    state.flush("prediction_available")

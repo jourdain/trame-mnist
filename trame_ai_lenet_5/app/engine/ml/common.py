@@ -1,58 +1,26 @@
+import os
 from pathlib import Path
 
 import torch
 import torch.nn as nn
-import torchvision
 import torchvision.transforms as transforms
 import numpy as np
 
+# -----------------------------------------------------------------------------
+# Globals
+# -----------------------------------------------------------------------------
+
 DATA_DIR = str(
-    Path(Path(__file__).parent.parent.parent.parent, "data").resolve().absolute()
+    Path(Path(__file__).parent.parent.parent.parent.parent, "data").resolve().absolute()
 )
+
+MODEL_PATH = Path(DATA_DIR, "model_lenet-5.trained").resolve().absolute()
 
 TRANSFORM = transforms.Compose(
     [transforms.ToTensor(), transforms.Normalize((0,), (1,))]
 )
 
-
-def create_dataset_loaders(batch_size):
-    transform = TRANSFORM
-
-    training_set = torchvision.datasets.MNIST(
-        root=DATA_DIR,
-        train=True,
-        download=True,
-        transform=transform,
-    )
-
-    training_set, validation_set = torch.utils.data.random_split(
-        training_set, [55000, 5000]
-    )
-
-    train_loader = torch.utils.data.DataLoader(
-        training_set, batch_size=batch_size, shuffle=True
-    )
-
-    validation_loader = torch.utils.data.DataLoader(
-        validation_set,
-        batch_size=batch_size,
-        shuffle=True,
-    )
-
-    testing_set = torchvision.datasets.MNIST(
-        root=DATA_DIR,
-        train=False,
-        download=True,
-        transform=transform,
-    )
-
-    testing_loader = torch.utils.data.DataLoader(
-        testing_set,
-        batch_size=batch_size,
-        shuffle=False,
-    )
-
-    return train_loader, validation_loader, testing_loader
+# -----------------------------------------------------------------------------
 
 
 class LeNet5(nn.Module):
@@ -83,6 +51,9 @@ class LeNet5(nn.Module):
         x = self.relu(self.fc1(x))
         x = self.fc2(x)
         return x
+
+
+# -----------------------------------------------------------------------------
 
 
 class Model:
@@ -134,30 +105,14 @@ class Model:
         self.val_loss.append(float(np.mean(batch_loss)))
         self.val_acc.append(float(np.mean(batch_acc)))
 
-    def test_step(self, dataset):
-        self.model.eval()
-        batch_acc = []
-        for inputs, targets in dataset:
-            outputs = self.model(inputs)
-            batch_acc.append(self.batch_accuracy(outputs, targets))
-
-        print("Accuracy : ", np.mean(batch_acc), "%")
-
-    def printSelf(self):
-        print("Training accuracy:", self.train_acc)
-        print("Training loss:", self.train_loss)
-        print("-" * 30)
-        print("Validation accuracy:", self.val_acc)
-        print("Validation loss:", self.val_loss)
-
-    def load(self, model_path):
+    def load(self, model_path=MODEL_PATH):
         if Path(model_path).exists():
             data = torch.load(model_path)
             self.metadata = data.get("metadata")
             self.model.load_state_dict(data.get("state_dict"))
             self.model.eval()
 
-    def save(self, output_path):
+    def save(self, output_path=MODEL_PATH):
         data = {
             "state_dict": self.model.state_dict(),
             "metadata": self.metadata,
@@ -190,59 +145,19 @@ class Model:
 
 
 # -----------------------------------------------------------------------------
-# External API
-# -----------------------------------------------------------------------------
-
-TEST_DATASET = torchvision.datasets.MNIST(
-    root=DATA_DIR,
-    train=False,
-    download=True,
-)
 
 
-def get_trained_model(path_to_use):
-    if not Path(path_to_use).exists():
-        return None
-
+def get_model(learning_rate=1e-5):
     lenet5 = LeNet5()
-    model = Model(lenet5)
-    model.load(path_to_use)
+    model = Model(lenet5, learning_rate)
+    model.load()
     return model
 
 
-def train_model(path_to_use, queue, end_epoch, learning_rate=1e-5, batch=32):
-    queue.put_nowait(
-        {
-            "training_running": True,
-            "epoch_end": end_epoch,
-        }
-    )
-    train_loader, val_loader, test_loader = create_dataset_loaders(batch)
-    lenet5 = LeNet5()
-    model = Model(lenet5, learning_rate)
+def delete_model():
+    if MODEL_PATH.exists():
+        os.remove(MODEL_PATH)
 
-    model.load(path_to_use)
 
-    while model.epoch < end_epoch:
-        model.train_step(train_loader)
-        model.validation_step(val_loader)
-        # model.test_step(test_loader)
-        # model.printSelf()
-
-        model.epoch += 1
-        queue.put_nowait(
-            {
-                "model_state": model.metadata,
-            }
-        )
-
-    queue.put_nowait(
-        {
-            "epoch_end": max(end_epoch, model.epoch),
-            "model_state": model.metadata,
-            "training_running": False,
-        }
-    )
-
-    model.save(path_to_use)
-    queue.put_nowait("stop")
+def has_trained_model():
+    return MODEL_PATH.exists()

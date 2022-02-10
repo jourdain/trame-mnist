@@ -44,7 +44,8 @@ with layout.toolbar as tb:
             icon=True,
             small=True,
             classes="ml-4",
-            click=ctrl.prediction_next_fail,
+            click=ctrl.prediction_next_failure,
+            disabled=("!prediction_available",),
         ):
             vuetify.VIcon("mdi-shield-bug-outline")
 
@@ -58,7 +59,7 @@ with layout.toolbar as tb:
     ):
         with vuetify.VBtn(value="training"):
             vuetify.VIcon("mdi-school-outline")
-        with vuetify.VBtn(value="execution"):
+        with vuetify.VBtn(value="execution", disabled=("!prediction_available",)):
             vuetify.VIcon("mdi-run")
 
 
@@ -70,17 +71,19 @@ with layout.content:
             ctrl.chart_acc_update = chart_acc.update
             chart_loss = vega.VegaEmbed(name="chart_loss", style="width: 100%;")
             ctrl.chart_loss_update = chart_loss.update
+
         with vuetify.VRow(v_if="view_mode == 'execution'", classes="pa-3 ma-2 "):
             with vuetify.VCol(align_self="center", cols=4):
                 with vuetify.VRow(justify="center"):
                     with Div(style="position: relative; flex: none; width: 200px;"):
                         with vuetify.VBtn(
                             fab=True,
-                            click=ctrl.prediction_update_input,
+                            click=ctrl.prediction_update,
                             style="position: absolute; right: -16px; top: -16px; z-index: 1;",
                             # color="primary",
                             x_small=True,
                             color=("prediction_success ? 'green' : 'red'",),
+                            disabled=("!prediction_available",),
                         ):
                             vuetify.VIcon("mdi-autorenew")
 

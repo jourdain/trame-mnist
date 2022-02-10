@@ -5,9 +5,8 @@ from . import engine
 def on_start():
     ctrl.on_ready = engine.initialize
 
-    ctrl.training_add = engine.run_training
-    ctrl.training_reset = engine.reset_training
+    ctrl.training_add = engine.training_add
+    ctrl.training_reset = engine.training_reset
 
-    ctrl.prediction_update_input = engine.update_prediction_input
-    ctrl.prediction_run = engine.run_prediction
-    ctrl.prediction_next_fail = engine.find_next_fail
+    ctrl.prediction_update = engine.prediction_update
+    ctrl.prediction_next_failure = engine.prediction_next_failure
