@@ -96,6 +96,8 @@ class ClassificationSaliency(Saliency):
 
 
 def xai_update(model, input, name="RISEStack"):
+    print("model", model.model)
+    print("input", input)
     xai_model = ClassificationSaliency(
         model,
         name,
