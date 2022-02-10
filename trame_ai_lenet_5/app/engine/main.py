@@ -27,6 +27,7 @@ state.update(
     {
         "epoch_end": 0,
         "training_running": False,
+        "prediction_success": False,
         "model_state": {
             "epoch": 0,
             "training_accuracy": [],
