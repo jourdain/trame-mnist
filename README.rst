@@ -2,7 +2,7 @@
 Trame MNIST
 ================
 
-Example application using __trame__ for exploring MNIST dataset in the context of AI training and XAI thanks to __XAITK__.
+Example application using **trame** for exploring MNIST dataset in the context of AI training and XAI thanks to **XAITK**.
 
 * Free software: BSD License
 * `XAITK Saliency with MNIST <https://github.com/XAITK/xaitk-saliency/blob/master/examples/MNIST_scikit_saliency.ipynb>`_
