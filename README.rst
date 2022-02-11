@@ -34,10 +34,10 @@ venv creation for AI
     conda install "pytorch==1.9.1" "torchvision==0.10.1" -c pytorch
     conda install scipy "scikit-learn==0.24.2" "scikit-image==0.18.3" -c conda-forge
 
-    # For development
+    # For development when inside repo
     pip install -e .
 
-    # For testing
+    # For testing (no need to clone repo)
     pip install trame-mnist
 
 
@@ -49,6 +49,15 @@ Run the application
     conda activate trame-mnist
     trame-mnist
 
+
+|image_1| |image_2| |image_3|
+
+.. |image_1| image:: https://raw.githubusercontent.com/jourdain/trame-mnist/master/documentation/gallery/trame-mnist-02.jpg
+  :width: 30%
+.. |image_2| image:: https://raw.githubusercontent.com/jourdain/trame-mnist/master/documentation/gallery/trame-mnist-03.jpg
+  :width: 30%
+.. |image_3| image:: https://raw.githubusercontent.com/jourdain/trame-mnist/master/documentation/gallery/trame-mnist-04.jpg
+  :width: 30%
 
 Deploying new version
 ---------------------
