@@ -11,7 +11,7 @@ import numpy as np
 # -----------------------------------------------------------------------------
 
 DATA_DIR = str(
-    Path(Path(__file__).parent.parent.parent.parent.parent, "data").resolve().absolute()
+    Path(Path(__file__).parent.parent.parent.parent, "data").resolve().absolute()
 )
 
 MODEL_PATH = Path(DATA_DIR, "model_lenet-5.trained").resolve().absolute()
