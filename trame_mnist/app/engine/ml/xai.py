@@ -7,7 +7,10 @@ import torch.nn as nn
 
 # xaitk-saliency
 from smqtk_classifier import ClassifyImage
-from xaitk_saliency.impls.gen_image_classifier_blackbox_sal import rise, slidingwindow
+from xaitk_saliency.impls.gen_image_classifier_blackbox_sal import (
+    rise,
+    slidingwindow as sw,
+)
 
 # App specific
 from .common import TRANSFORM
@@ -53,13 +56,11 @@ class ClassificationSaliency:
 SALIENCY_TYPES = ["RISEStack", "SlidingWindowStack"]
 
 METHOD_RISE = rise.RISEStack(n=200, s=8, p1=0.5, seed=1234, threads=4, debiased=True)
-METHOD_SLIDING_WINDOW = slidingwindow.SlidingWindowStack(
-    window_size=[2, 2], stride=[1, 1], threads=4
-)
+METHOD_SW = sw.SlidingWindowStack(window_size=[2, 2], stride=[1, 1], threads=4)
 
 INSTANCES = {
     "RISEStack": ClassificationSaliency(METHOD_RISE),
-    "SlidingWindowStack": ClassificationSaliency(METHOD_SLIDING_WINDOW),
+    "SlidingWindowStack": ClassificationSaliency(METHOD_SW),
 }
 
 
