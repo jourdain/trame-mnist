@@ -1,13 +1,13 @@
 from typing import ValuesView
 from trame import state, controller as ctrl
 from trame.layouts import SinglePage
-from trame.html import vega, vuetify, Div, Span
+from trame.html import vega, vuetify, xai, Div, Span
 
 # Create single page layout type
-layout = SinglePage("AI LeNet-5", on_ready=ctrl.on_ready)
+layout = SinglePage("MNIST Exploration", on_ready=ctrl.on_ready)
 
 # Toolbar
-layout.title.set_text("AI LeNet-5")
+layout.title.set_text("MNIST Exploration")
 with layout.toolbar as tb:
     tb.dense = True
 
@@ -39,7 +39,9 @@ with layout.toolbar as tb:
             click=ctrl.training_reset,
         )
 
-    with Div(v_show="view_mode === 'execution'"):
+    with vuetify.VRow(
+        v_show="view_mode === 'execution'", justify="end", align="center"
+    ):
         with vuetify.VBtn(
             icon=True,
             small=True,
@@ -49,14 +51,14 @@ with layout.toolbar as tb:
         ):
             vuetify.VIcon("mdi-shield-bug-outline")
 
-        with vuetify.VBtn(
-            small=True,
-            classes="ml-4",
-            click=ctrl.xai_run,
-            disabled=("!prediction_available",),
-            icon=True,
-        ):
-            vuetify.VIcon("mdi-wizard-hat")
+        vuetify.VCheckbox(
+            v_model=("xai_viz", True),
+            classes="ml-4 my-0 py-0",
+            dense=True,
+            hide_details=True,
+            on_icon="mdi-wizard-hat",
+            off_icon="mdi-snapchat",
+        )
 
     vuetify.VDivider(vertical=True, classes="mx-4")
 
@@ -113,6 +115,53 @@ with layout.content:
                     name="chart_prediction", style="width: 100%; display: flex;"
                 )
                 ctrl.chart_pred_update = chart_pred.update
+
+        with vuetify.VCol(v_if="view_mode == 'execution'"):
+            with vuetify.VRow(classes="px-0 ma-0"):
+                with vuetify.VCol(v_for=("i in 10",), key="i", classes="pa-0 ma-0"):
+                    with vuetify.VRow(
+                        justify="center", align="center", classes="pa-0 ma-0"
+                    ):
+                        Div(
+                            "{{ i - 1 }}",
+                            style="width: 70%; text-align: center;",
+                            classes=(
+                                "{ 'rounded-pill': true, 'elevation-5 teal': prediction_label == (i - 1) }",
+                            ),
+                        )
+            with vuetify.VCol(v_if=("xai_viz",), classes="px-2 ma-0"):
+                with vuetify.VTooltip(
+                    v_for=("result, method, idx in xai_results",),
+                    top=("idx === 0",),
+                    bottom=("idx === 1",),
+                    key="method",
+                ):
+                    with vuetify.Template(v_slot_activator="{ on, attrs }"):
+                        with vuetify.VRow(
+                            align_self="center",
+                            v_bind=("attrs",),
+                            v_on=("on",),
+                            __properties=["v_bind", "v_on"],
+                            classes="py-2",
+                        ):
+                            with vuetify.VCol(
+                                v_for=("i in 10",), key="i", classes="py-0"
+                            ):
+                                xai.XaiImage(
+                                    src=("prediction_input_url",),
+                                    areas=("[]",),
+                                    width="100%",
+                                    heatmaps=("result.heatmaps",),
+                                    heatmap_opacity=0.85,
+                                    heatmap_color_preset="BuRd",  # coolwarm, rainbow, blue2cyan, BuRd
+                                    heatmap_active=("`${i-1}`",),
+                                    heatmap_color_range=("[-1, 1]",),
+                                    heatmap_color_mode="custom",
+                                )
+                    Span(
+                        "{{ method }}: {{ result.range }} of range but colored [-1, 1]"
+                    )
+
 
 # Footer
 # layout.footer.hide()

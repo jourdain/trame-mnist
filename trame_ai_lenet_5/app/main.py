@@ -1,3 +1,5 @@
+# import os
+# os.environ["WSLINK_HEARBEAT"] = "0"
 from trame import setup_dev
 from . import controller, ui
 

@@ -1,6 +1,5 @@
-import os
+import numpy as np
 import base64
-import random
 import asyncio
 from pathlib import Path
 
@@ -28,6 +27,7 @@ TRAINING_INITIAL_STATE = {
         "validation_accuracy": [],
         "validation_loss": [],
     },
+    "xai_results": [],
 }
 
 state.update(
@@ -103,29 +103,38 @@ def prediction_update():
     state.prediction_success = max(prediction) == prediction[label]
     ctrl.chart_pred_update(charts.prediction_chart(prediction))
 
+    if state.xai_viz:
+        xai_run()
+
 
 # -----------------------------------------------------------------------------
 
 
 async def prediction_next_failure():
-    prediction_update()
-    state.flush("prediction_success")  # Force it to be green
+    with state.monitor():
+        prediction_update()
+        # state.flush("prediction_success")  # Force it to be green
 
-    while state.prediction_success:
-        with state.monitor():
-            prediction_update()
-        await asyncio.sleep(0.05)
+    if state.prediction_success:
+        loop = asyncio.get_event_loop()
+        loop.call_later(0.01, lambda: asyncio.ensure_future(prediction_next_failure()))
 
 
 # -----------------------------------------------------------------------------
 
 
 def xai_run():
+    results = {}
     model, image = ml.prediction_xai_params()
-    result = ml.xai_update(model, image)
-    print(result)
-    print("=" * 60)
-    print(dir(result))
+    for xai_method in ml.SALIENCY_TYPES:
+        result = ml.xai_update(model, image, xai_method)
+        heatmaps = {}
+        data_range = [float(np.amin(result)), float(np.amax(result))]
+        for i in range(10):
+            heatmaps[f"{i}"] = result[i].ravel().tolist()
+        results[xai_method] = {"heatmaps": heatmaps, "range": data_range}
+
+    state.xai_results = results
 
 
 # -----------------------------------------------------------------------------
@@ -138,3 +147,14 @@ def update_charts(model_state, **kwargs):
     acc, loss = charts.acc_loss_charts(model_state)
     ctrl.chart_acc_update(acc)
     ctrl.chart_loss_update(loss)
+
+
+@state.change("xai_viz_color_min", "xai_viz_color_max")
+def update_xai_color_range(xai_viz_color_min, xai_viz_color_max, **kwargs):
+    state.xai_viz_color_range = [xai_viz_color_min, xai_viz_color_max]
+
+
+@state.change("xai_viz")
+def toggle_xai_viz(xai_viz, **kwargs):
+    if xai_viz:
+        xai_run()

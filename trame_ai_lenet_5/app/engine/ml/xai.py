@@ -17,8 +17,6 @@ from smqtk_classifier import ClassifyImage
 # App specific
 from .common import TRANSFORM
 
-FILL = np.uint8(np.asarray([0.485, 0.456, 0.406]) * 255)
-
 SALIENCY_TYPES = {
     "RISEStack": {
         "_saliency": {
@@ -39,16 +37,16 @@ SALIENCY_PARAMS = {
 
 SALIENCY_PARAMS_DEFAULTS = {
     "RISEStack": {
-        "n": 100,
+        "n": 200,
         "s": 8,
         "p1": 0.5,
         "seed": 1234,
         "threads": 4,
-        "debiased": False,
+        "debiased": True,
     },
     "SlidingWindowStack": {
-        "window_size": [10, 10],
-        "stride": [10, 10],
+        "window_size": [2, 2],
+        "stride": [1, 1],
         "threads": 4,
     },
 }
@@ -57,7 +55,7 @@ SALIENCY_PARAMS_DEFAULTS = {
 # SMQTK black-box classifier
 class ClfModel(ClassifyImage):
     def __init__(self, model):
-        self.model = model.model # ??? is it the right model ?
+        self.model = model
         self._labels = list(range(10))
 
     def get_labels(self):
@@ -66,8 +64,7 @@ class ClfModel(ClassifyImage):
     @torch.no_grad()
     def classify_images(self, image_iter):
         for img in image_iter:
-            inp = TRANSFORM(img).unsqueeze(0) # ???? imagenet_model_loader(img).unsqueeze(0)
-            print("inp", inp)
+            inp = TRANSFORM(img).unsqueeze(0)
             vec = self.model(inp).cpu().numpy().squeeze()
             out = softmax(vec)
             yield dict(zip(self.get_labels(), out))
@@ -91,13 +88,10 @@ class Saliency:
 
 class ClassificationSaliency(Saliency):
     def run(self, input, *_):
-        self._saliency.fill = FILL
         return self._saliency(input, ClfModel(self._model))
 
 
 def xai_update(model, input, name="RISEStack"):
-    print("model", model.model)
-    print("input", input)
     xai_model = ClassificationSaliency(
         model,
         name,

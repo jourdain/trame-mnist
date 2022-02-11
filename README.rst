@@ -1,12 +1,11 @@
 ================
-Trame AI LeNet-5
+Trame MNIST
 ================
 
 Visualization exploration for AI/XAI
 
-
 * Free software: BSD License
-
+* `MNIST and XAITK <https://github.com/XAITK/xaitk-saliency/blob/master/examples/MNIST_scikit_saliency.ipynb>`_
 
 Installing
 ----------

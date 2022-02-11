@@ -1,7 +1,7 @@
 from .common import has_trained_model, delete_model, DATA_DIR
 from .training import training_add
 from .prediction import prediction_reload, prediction_update, prediction_xai_params
-from .xai import xai_update
+from .xai import xai_update, SALIENCY_TYPES
 
 __all__ = [
     "DATA_DIR",
@@ -12,4 +12,5 @@ __all__ = [
     "prediction_update",
     "prediction_xai_params",
     "xai_update",
+    "SALIENCY_TYPES",
 ]
