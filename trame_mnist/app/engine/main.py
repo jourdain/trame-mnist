@@ -10,8 +10,8 @@ from concurrent.futures import ProcessPoolExecutor
 from . import ml, utils, charts
 from trame import state, controller as ctrl
 
-MULTI_PROCESS_MANAGER = multiprocessing.Manager()
-PROCESS_EXECUTOR = ProcessPoolExecutor(1)
+MULTI_PROCESS_MANAGER = None
+PROCESS_EXECUTOR = None
 PENDING_TASKS = []
 
 # -----------------------------------------------------------------------------
@@ -41,6 +41,10 @@ state.update(
 
 
 def initialize(**kwargs):
+    global MULTI_PROCESS_MANAGER, PROCESS_EXECUTOR
+    MULTI_PROCESS_MANAGER = multiprocessing.Manager()
+    PROCESS_EXECUTOR = ProcessPoolExecutor(1)
+
     if ml.has_trained_model() and state.epoch_end == 0:
         # Just load existing state
         asyncio.create_task(training_add())
