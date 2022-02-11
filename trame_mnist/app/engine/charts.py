@@ -121,6 +121,27 @@ def prediction_chart(prediction_list):
     return chart
 
 
+def class_accuracy(matrix):
+    x = [matrix[i, i] for i in range(10)]
+
+    df = pd.DataFrame(
+        {
+            "acc": x,
+            "class": list(range(10)),
+        }
+    )
+
+    bars = alt.Chart(df).mark_bar().encode(x="acc:Q", y="class:O")
+
+    text = bars.mark_text(
+        align="left",
+        baseline="middle",
+        dx=3,  # Nudges text to right so it doesn't appear on top of the bar
+    ).encode(text="acc:Q")
+
+    return (bars + text).properties(width="container", height=500)
+
+
 def confusion_matrix_chart(matrix):
     x, y = np.meshgrid(range(0, 10), range(0, 10))
     df = pd.DataFrame(
@@ -139,6 +160,7 @@ def confusion_matrix_chart(matrix):
             y=alt.Y("y:O", axis=alt.Axis(title="Classification")),
             color=alt.Color(
                 "z:Q",
+                title="",
                 scale=alt.Scale(
                     scheme="inferno",
                     domain=[-15, 115],
@@ -159,4 +181,4 @@ def confusion_matrix_chart(matrix):
         color=alt.condition(alt.datum.z < 20, alt.value("white"), alt.value("black")),
     )
 
-    return (chart + text).properties(width="container", height="container")
+    return (chart + text).properties(width="container", height=500)

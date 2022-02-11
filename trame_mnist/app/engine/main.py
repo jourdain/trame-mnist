@@ -57,7 +57,7 @@ def initialize(**kwargs):
 # Methods to bound to UI
 # -----------------------------------------------------------------------------
 
-state.epoch_increase = 2 # we need a minimum of 2 points to plot progress
+state.epoch_increase = 2  # we need a minimum of 2 points to plot progress
 
 
 async def training_add():
@@ -154,6 +154,8 @@ def _testing_running():
     with state.monitor():
         matrix, sample_size = ml.testing_run()
         ctrl.chart_confusion_matrix(charts.confusion_matrix_chart(matrix))
+        ctrl.chart_class_accuracy(charts.class_accuracy(matrix))
+
         state.testing_count = sample_size
         state.testing_running = False
 

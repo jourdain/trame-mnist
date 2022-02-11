@@ -24,4 +24,5 @@ async def queue_to_state(queue, *tasks):
 
     # Make sure we can go to prediction
     state.prediction_available = prediction_reload()
-    state.flush("prediction_available")
+    state.testing_count = 0
+    state.flush("prediction_available", "testing_count")

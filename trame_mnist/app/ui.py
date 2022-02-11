@@ -15,9 +15,17 @@ with layout.toolbar as tb:
 
     # Training buttons
     with Div(v_show="view_mode === 'training'"):
-        with vuetify.VBtn(small=True, outlined=True, icon=True, click="epoch_increase -= 1", disabled=("epoch_increase === 1",)):
+        with vuetify.VBtn(
+            small=True,
+            outlined=True,
+            icon=True,
+            click="epoch_increase -= 1",
+            disabled=("epoch_increase === 1",),
+        ):
             vuetify.VIcon("mdi-minus")
-        with vuetify.VBtn(small=True, outlined=True, icon=True, click="epoch_increase += 1"):
+        with vuetify.VBtn(
+            small=True, outlined=True, icon=True, click="epoch_increase += 1"
+        ):
             vuetify.VIcon("mdi-plus")
         with vuetify.VBtn(
             "Train ({{model_state.epoch}} +{{ epoch_increase }} epoch)",
@@ -91,6 +99,7 @@ with layout.toolbar as tb:
             text_color="white",
             hide_details=True,
             dense=True,
+            click="testing_count = 0",
         )
         vuetify.VBtn(
             "Run testing",
@@ -121,7 +130,7 @@ with layout.toolbar as tb:
 with layout.content:
     with vuetify.VContainer(
         fluid=True,
-        classes=("{'pa-0': true, 'fill-height': view_mode == 'testing' }",),
+        classes="pa-0",
     ):
         # Welcome for empty model
         with vuetify.VCard(v_if=("model_state.epoch < 2",), classes="ma-8"):
@@ -157,7 +166,11 @@ with layout.content:
             ctrl.chart_loss_update = chart_loss.update
 
         # Execution page
-        with vuetify.VRow(v_if="view_mode == 'execution'", classes="pa-3 ma-2", style="min-height: 275px;"):
+        with vuetify.VRow(
+            v_if="view_mode == 'execution'",
+            classes="pa-3 ma-2",
+            style="min-height: 275px;",
+        ):
             with vuetify.VCol(align_self="center", cols=4):
                 with vuetify.VRow(justify="center"):
                     with Div(style="position: relative; flex: none; width: 200px;"):
@@ -186,7 +199,8 @@ with layout.content:
 
             with vuetify.VCol(align_self="center", cols=8):
                 chart_pred = vega.VegaEmbed(
-                    name="chart_prediction", style="width: 100%; display: flex;"
+                    name="chart_prediction",
+                    style="width: 100%; display: flex;",
                 )
                 ctrl.chart_pred_update = chart_pred.update
 
@@ -248,10 +262,17 @@ with layout.content:
             chart_confusion_matrix = vega.VegaEmbed(
                 name="chart_confusion_matrix",
                 v_show="view_mode == 'testing' && testing_count",
-                style="width: 100%; height: 100%;",
+                style="width: 50%;",
+                key="`${testing_count}-matrix`",
             )
             ctrl.chart_confusion_matrix = chart_confusion_matrix.update
 
-
+            chart_class_accuracy = vega.VegaEmbed(
+                name="chart_class_accuracy",
+                v_show="view_mode == 'testing' && testing_count",
+                style="width: 50%;",
+                key="`${testing_count}-class`",
+            )
+            ctrl.chart_class_accuracy = chart_class_accuracy.update
 # Footer
 # layout.footer.hide()
