@@ -6,50 +6,11 @@ import torch
 import torch.nn as nn
 
 # xaitk-saliency
-from xaitk_saliency.impls.gen_image_classifier_blackbox_sal.rise import RISEStack
-from xaitk_saliency.impls.gen_image_classifier_blackbox_sal.slidingwindow import (
-    SlidingWindowStack,
-)
-
-# xaitk-saliency
 from smqtk_classifier import ClassifyImage
+from xaitk_saliency.impls.gen_image_classifier_blackbox_sal import rise, slidingwindow
 
 # App specific
 from .common import TRANSFORM
-
-SALIENCY_TYPES = {
-    "RISEStack": {
-        "_saliency": {
-            "class": RISEStack,
-        },
-    },
-    "SlidingWindowStack": {
-        "_saliency": {
-            "class": SlidingWindowStack,
-        },
-    },
-}
-
-SALIENCY_PARAMS = {
-    "RISEStack": ["n", "s", "p1", "seed", "threads", "debiased"],
-    "SlidingWindowStack": ["window_size", "stride", "threads"],
-}
-
-SALIENCY_PARAMS_DEFAULTS = {
-    "RISEStack": {
-        "n": 200,
-        "s": 8,
-        "p1": 0.5,
-        "seed": 1234,
-        "threads": 4,
-        "debiased": True,
-    },
-    "SlidingWindowStack": {
-        "window_size": [2, 2],
-        "stride": [1, 1],
-        "threads": 4,
-    },
-}
 
 
 # SMQTK black-box classifier
@@ -74,27 +35,35 @@ class ClfModel(ClassifyImage):
         return {}
 
 
-class Saliency:
-    def __init__(self, model, name, params):
-        self._model = model
-        try:
-            for key, value in SALIENCY_TYPES[name].items():
-                constructor = value.get("class")
-                param_keys = value.get("params", params.keys())
-                setattr(self, key, constructor(**{k: params[k] for k in param_keys}))
-        except:
-            print(f"Could not find {name} in {list(SALIENCY_TYPES.keys())}")
+class ClassificationSaliency:
+    def __init__(self, method):
+        self._saliency = method
+        self._model = None
+        self._class_model = None
 
+    def set_model(self, model):
+        if self._model != model:
+            self._model = model
+            self._class_model = ClfModel(self._model)
 
-class ClassificationSaliency(Saliency):
     def run(self, input, *_):
-        return self._saliency(input, ClfModel(self._model))
+        return self._saliency(input, self._class_model)
+
+
+SALIENCY_TYPES = ["RISEStack", "SlidingWindowStack"]
+
+METHOD_RISE = rise.RISEStack(n=200, s=8, p1=0.5, seed=1234, threads=4, debiased=True)
+METHOD_SLIDING_WINDOW = slidingwindow.SlidingWindowStack(
+    window_size=[2, 2], stride=[1, 1], threads=4
+)
+
+INSTANCES = {
+    "RISEStack": ClassificationSaliency(METHOD_RISE),
+    "SlidingWindowStack": ClassificationSaliency(METHOD_SLIDING_WINDOW),
+}
 
 
 def xai_update(model, input, name="RISEStack"):
-    xai_model = ClassificationSaliency(
-        model,
-        name,
-        SALIENCY_PARAMS_DEFAULTS[name],
-    )
+    xai_model = INSTANCES[name]
+    xai_model.set_model(model)
     return xai_model.run(input)

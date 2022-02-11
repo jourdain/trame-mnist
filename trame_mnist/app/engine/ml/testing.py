@@ -41,8 +41,8 @@ def testing_run(datasets=LOADER_TEST):
 
     # Normalize
     total = np.sum(confusion_matrix)
-    for i in range(10):
-        ratio = np.sum(confusion_matrix[i])
-        confusion_matrix[i] *= 100 / ratio
+    # for i in range(10):
+    #     ratio = np.sum(confusion_matrix[i])
+    #     confusion_matrix[i] *= 100 / ratio
 
     return np.around(confusion_matrix), int(total)

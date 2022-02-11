@@ -122,7 +122,14 @@ def prediction_chart(prediction_list):
 
 
 def class_accuracy(matrix):
-    x = [matrix[i, i] for i in range(10)]
+    confusion_matrix = matrix.copy()
+    for i in range(10):
+        ratio = np.sum(confusion_matrix[i])
+        confusion_matrix[i] *= 100 / ratio
+
+    confusion_matrix = np.around(confusion_matrix)
+
+    x = [confusion_matrix[i, i] for i in range(10)]
 
     df = pd.DataFrame(
         {
@@ -131,8 +138,14 @@ def class_accuracy(matrix):
         }
     )
 
-    bars = alt.Chart(df).mark_bar().encode(x="acc:Q", y="class:O")
-
+    bars = (
+        alt.Chart(df)
+        .mark_bar()
+        .encode(
+            alt.X("acc:Q", axis=alt.Axis(title="Accuracy")),
+            alt.Y("class:O", axis=alt.Axis(title="Classes")),
+        )
+    )
     text = bars.mark_text(
         align="left",
         baseline="middle",
@@ -163,7 +176,7 @@ def confusion_matrix_chart(matrix):
                 title="",
                 scale=alt.Scale(
                     scheme="inferno",
-                    domain=[-15, 115],
+                    domain=[-15, np.amax(matrix)],
                 ),
             ),
             # tooltip=[
