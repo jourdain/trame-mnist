@@ -1,5 +1,4 @@
-from typing import ValuesView
-from trame import state, controller as ctrl
+from trame import controller as ctrl
 from trame.layouts import SinglePage
 from trame.html import vega, vuetify, xai, Div, Span
 
@@ -13,6 +12,7 @@ with layout.toolbar as tb:
 
     vuetify.VSpacer()
 
+    # Training buttons
     with Div(v_show="view_mode === 'training'"):
         with vuetify.VBtn(
             "Train ({{model_state.epoch}} +10 epoch)",
@@ -39,26 +39,37 @@ with layout.toolbar as tb:
             click=ctrl.training_reset,
         )
 
+    # Execution buttons
     with vuetify.VRow(
-        v_show="view_mode === 'execution'", justify="end", align="center"
+        v_show="view_mode === 'execution'",
+        justify="end",
+        align="center",
     ):
-        with vuetify.VBtn(
-            icon=True,
-            small=True,
-            classes="ml-4",
-            click=ctrl.prediction_next_failure,
-            disabled=("!prediction_available",),
-        ):
-            vuetify.VIcon("mdi-shield-bug-outline")
+        with vuetify.VTooltip(bottom=True):
+            with vuetify.Template(v_slot_activator="{ on, attrs }"):
+                with Div(v_bind="attrs", v_on="on", __properties=["v_bind", "v_on"]):
+                    vuetify.VCheckbox(
+                        v_model=("prediction_search_failure", False),
+                        classes="ml-4 my-0 py-0",
+                        dense=True,
+                        hide_details=True,
+                        on_icon="mdi-target-account",
+                        off_icon="mdi-target",
+                    )
+            Span("Toggle search for prediction mismatch")
 
-        vuetify.VCheckbox(
-            v_model=("xai_viz", True),
-            classes="ml-4 my-0 py-0",
-            dense=True,
-            hide_details=True,
-            on_icon="mdi-wizard-hat",
-            off_icon="mdi-snapchat",
-        )
+        with vuetify.VTooltip(bottom=True):
+            with vuetify.Template(v_slot_activator="{ on, attrs }"):
+                with Div(v_bind="attrs", v_on="on", __properties=["v_bind", "v_on"]):
+                    vuetify.VCheckbox(
+                        v_model=("xai_viz", True),
+                        classes="ml-4 my-0 py-0",
+                        dense=True,
+                        hide_details=True,
+                        on_icon="mdi-wizard-hat",
+                        off_icon="mdi-wizard-hat",
+                    )
+            Span("Toggle XAITK visualization")
 
     vuetify.VDivider(vertical=True, classes="mx-4")
 

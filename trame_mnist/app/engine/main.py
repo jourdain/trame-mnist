@@ -114,14 +114,15 @@ def prediction_update():
 # -----------------------------------------------------------------------------
 
 
-async def prediction_next_failure():
+def _prediction_next_failure():
     with state.monitor():
         prediction_update()
-        # state.flush("prediction_success")  # Force it to be green
+        if not state.prediction_success:
+            state.prediction_search_failure = False
 
-    if state.prediction_success:
+    if state.prediction_success and state.prediction_search_failure:
         loop = asyncio.get_event_loop()
-        loop.call_later(0.01, lambda: asyncio.ensure_future(prediction_next_failure()))
+        loop.call_later(0.01, lambda: asyncio.ensure_future(_prediction_next_failure()))
 
 
 # -----------------------------------------------------------------------------
@@ -165,3 +166,9 @@ def update_xai_color_range(xai_viz_color_min, xai_viz_color_max, **kwargs):
 def toggle_xai_viz(xai_viz, **kwargs):
     if xai_viz:
         xai_run()
+
+
+@state.change("prediction_search_failure")
+def toggle_search_failue(prediction_search_failure, **kwargs):
+    if prediction_search_failure:
+        _prediction_next_failure()

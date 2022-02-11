@@ -3,7 +3,6 @@ from .main import (
     training_add,
     training_reset,
     prediction_update,
-    prediction_next_failure,
     xai_run,
 )
 
@@ -12,6 +11,5 @@ __all__ = [
     "training_add",
     "training_reset",
     "prediction_update",
-    "prediction_next_failure",
     "xai_run",
 ]
