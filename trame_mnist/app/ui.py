@@ -77,7 +77,24 @@ with layout.toolbar as tb:
 # Main content
 with layout.content:
     with vuetify.VContainer(fluid=True, classes="pa-0"):
-        with vuetify.VCol(v_if="view_mode == 'training'"):
+        with vuetify.VCard(v_if=("model_state.epoch < 2",), classes="ma-8"):
+            vuetify.VCardTitle("Getting started")
+            vuetify.VCardText(
+                """
+                To get started, you need to create an AI model by trainning it.
+                The "Train" button let you add more learning to it.
+                But to start seeing learning progress and explore its prediction, you need to do it at least one.
+            """
+            )
+            with vuetify.VCardActions():
+                vuetify.VSpacer()
+                vuetify.VBtn(
+                    "Start training",
+                    click=ctrl.training_add,
+                    disabled=("training_running",),
+                )
+
+        with vuetify.VCol(v_if="view_mode == 'training' && model_state.epoch > 1"):
             chart_acc = vega.VegaEmbed(name="chart_acc", style="width: 100%;")
             ctrl.chart_acc_update = chart_acc.update
             chart_loss = vega.VegaEmbed(name="chart_loss", style="width: 100%;")

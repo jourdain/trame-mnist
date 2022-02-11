@@ -9,14 +9,6 @@ Visualization exploration for AI/XAI
 
 Installing
 ----------
-Build and install the Vue components
-
-.. code-block:: console
-
-    cd vue-components
-    npm i
-    npm run build
-    cd -
 
 For the Python layer it is recommended to use conda to properly install the various ML packages.
 
@@ -33,9 +25,11 @@ venv creation for AI
 
 .. code-block:: console
 
+    # Needed in order to get py3.9 with lzma
     # PYTHON_CONFIGURE_OPTS="--enable-framework" pyenv install 3.9.9
-    conda create --name lenet5 python=3.9
-    conda activate lenet5
+
+    conda create --name trame-mnist python=3.9
+    conda activate trame-mnist
     conda install "pytorch==1.9.1" "torchvision==0.10.1" -c pytorch
     conda install scipy "scikit-learn==0.24.2" "scikit-image==0.18.3" -c conda-forge
     pip install -e .
@@ -46,5 +40,5 @@ Run the application
 
 .. code-block:: console
 
-    conda activate lenet5
-    trame_ai_lenet_5
+    conda activate trame-mnist
+    trame-mnist

@@ -124,17 +124,20 @@ async def prediction_next_failure():
 
 
 def xai_run():
-    results = {}
-    model, image = ml.prediction_xai_params()
-    for xai_method in ml.SALIENCY_TYPES:
-        result = ml.xai_update(model, image, xai_method)
-        heatmaps = {}
-        data_range = [float(np.amin(result)), float(np.amax(result))]
-        for i in range(10):
-            heatmaps[f"{i}"] = result[i].ravel().tolist()
-        results[xai_method] = {"heatmaps": heatmaps, "range": data_range}
+    try:
+        results = {}
+        model, image = ml.prediction_xai_params()
+        for xai_method in ml.SALIENCY_TYPES:
+            result = ml.xai_update(model, image, xai_method)
+            heatmaps = {}
+            data_range = [float(np.amin(result)), float(np.amax(result))]
+            for i in range(10):
+                heatmaps[f"{i}"] = result[i].ravel().tolist()
+            results[xai_method] = {"heatmaps": heatmaps, "range": data_range}
 
-    state.xai_results = results
+        state.xai_results = results
+    except Exception:
+        pass  # Model is not available...
 
 
 # -----------------------------------------------------------------------------
