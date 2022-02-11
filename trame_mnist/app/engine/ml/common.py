@@ -68,6 +68,12 @@ class Model:
         self.val_acc = []
         self.epoch = 0
 
+    def eval(self, *args, **kwds):
+        return self.model.eval(*args, **kwds)
+
+    def __call__(self, *args, **kwds):
+        return self.model(*args, **kwds)
+
     def batch_accuracy(self, output, target):
         # output shape: [batch, 10]
         output = nn.functional.softmax(output, dim=1)

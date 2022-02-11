@@ -1,8 +1,7 @@
-import os
 import torch
 import torchvision
 
-from .common import TRANSFORM, DATA_DIR, MODEL_PATH, get_model
+from .common import TRANSFORM, DATA_DIR, get_model
 
 DATASET_TRAINING = torchvision.datasets.MNIST(
     root=DATA_DIR,

@@ -49,13 +49,15 @@ def initialize(**kwargs):
         # Just load existing state
         asyncio.create_task(training_add())
 
-    state.prediction_available = ml.prediction_reload()
+    reset_model()
     prediction_update()
 
 
 # -----------------------------------------------------------------------------
 # Methods to bound to UI
 # -----------------------------------------------------------------------------
+
+state.epoch_increase = 2 # we need a minimum of 2 points to plot progress
 
 
 async def training_add():
@@ -64,7 +66,7 @@ async def training_add():
     PENDING_TASKS.clear()
 
     if state.model_state.get("epoch") >= state.epoch_end:
-        state.epoch_end += 10
+        state.epoch_end += state.epoch_increase
 
     loop = asyncio.get_event_loop()
     queue = MULTI_PROCESS_MANAGER.Queue()
@@ -78,7 +80,7 @@ async def training_add():
     # Only join on monitor task
     PENDING_TASKS.append(task_monitor)
 
-    state.prediction_available = ml.prediction_reload()
+    reset_model()
 
 
 # -----------------------------------------------------------------------------
@@ -88,7 +90,7 @@ def training_reset():
     """Remove saved model and reset local state"""
     ml.delete_model()
     state.update(TRAINING_INITIAL_STATE)
-    state.prediction_available = ml.prediction_reload()
+    reset_model()
 
 
 # -----------------------------------------------------------------------------
@@ -122,7 +124,7 @@ def _prediction_next_failure():
 
     if state.prediction_success and state.prediction_search_failure:
         loop = asyncio.get_event_loop()
-        loop.call_later(0.01, lambda: asyncio.ensure_future(_prediction_next_failure()))
+        loop.call_later(0.01, _prediction_next_failure)
 
 
 # -----------------------------------------------------------------------------
@@ -143,6 +145,34 @@ def xai_run():
         state.xai_results = results
     except Exception:
         pass  # Model is not available...
+
+
+# -----------------------------------------------------------------------------
+
+
+def _testing_running():
+    with state.monitor():
+        matrix, sample_size = ml.testing_run()
+        ctrl.chart_confusion_matrix(charts.confusion_matrix_chart(matrix))
+        state.testing_count = sample_size
+        state.testing_running = False
+
+
+# -----------------------------------------------------------------------------
+
+
+def testing_run():
+    state.testing_running = True
+    loop = asyncio.get_event_loop()
+    loop.call_later(0.01, _testing_running)
+
+
+# -----------------------------------------------------------------------------
+
+
+def reset_model():
+    state.prediction_available = ml.prediction_reload()
+    state.testing_count = 0
 
 
 # -----------------------------------------------------------------------------

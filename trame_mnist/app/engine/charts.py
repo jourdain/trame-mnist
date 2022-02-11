@@ -1,5 +1,6 @@
 import altair as alt
 import pandas as pd
+import numpy as np
 
 SERIES_ALL = [
     "training_accuracy",
@@ -118,3 +119,44 @@ def prediction_chart(prediction_list):
         .properties(width="container", height=200)
     )
     return chart
+
+
+def confusion_matrix_chart(matrix):
+    x, y = np.meshgrid(range(0, 10), range(0, 10))
+    df = pd.DataFrame(
+        {
+            "x": x.ravel(),
+            "y": y.ravel(),
+            "z": matrix.ravel(),
+        }
+    )
+
+    chart = (
+        alt.Chart(df)
+        .mark_rect()
+        .encode(
+            x=alt.X("x:O", axis=alt.Axis(title="Ground truth")),
+            y=alt.Y("y:O", axis=alt.Axis(title="Classification")),
+            color=alt.Color(
+                "z:Q",
+                scale=alt.Scale(
+                    scheme="inferno",
+                    domain=[-15, 115],
+                ),
+            ),
+            # tooltip=[
+            #     alt.Tooltip('z:Q', title='%')
+            # ],
+        )
+    )
+
+    text = chart.mark_text(baseline="middle",).encode(
+        text=alt.condition(
+            alt.datum.z == 0,
+            alt.value(""),
+            alt.Text("z:Q"),
+        ),
+        color=alt.condition(alt.datum.z < 20, alt.value("white"), alt.value("black")),
+    )
+
+    return (chart + text).properties(width="container", height="container")

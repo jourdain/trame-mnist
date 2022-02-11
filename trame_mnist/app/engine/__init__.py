@@ -4,6 +4,7 @@ from .main import (
     training_reset,
     prediction_update,
     xai_run,
+    testing_run,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "training_reset",
     "prediction_update",
     "xai_run",
+    "testing_run",
 ]

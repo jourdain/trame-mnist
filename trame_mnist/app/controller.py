@@ -11,3 +11,5 @@ def on_start():
     ctrl.prediction_update = engine.prediction_update
 
     ctrl.xai_run = engine.xai_run
+
+    ctrl.testing_run = engine.testing_run
