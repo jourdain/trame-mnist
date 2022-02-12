@@ -13,12 +13,12 @@ Installing
 
 For the Python layer it is recommended to use `conda <https://docs.conda.io/en/latest/miniconda.html>`_ to properly install the various ML packages.
 
-conda setup
-^^^^^^^^^^^^
+conda setup on macOS
+^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: console
 
-    brew install miniforge     # for macOS but `read documentation <https://docs.conda.io/en/latest/miniconda.html>`_ for other OS
+    brew install miniforge     # Go to conda for your OS
     conda init zsh
 
 venv setup for AI
