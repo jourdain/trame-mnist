@@ -274,5 +274,6 @@ with layout.content:
                 key="`${testing_count}-class`",
             )
             ctrl.chart_class_accuracy = chart_class_accuracy.update
+
 # Footer
 # layout.footer.hide()

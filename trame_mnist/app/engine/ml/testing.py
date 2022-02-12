@@ -1,8 +1,6 @@
 import torch
 import torchvision
-import torch.nn as nn
 import numpy as np
-import time
 
 from .common import DATA_DIR, TRANSFORM
 from .prediction import get_model
@@ -39,10 +37,6 @@ def testing_run(datasets=LOADER_TEST):
         for i in range(inputs.shape[0]):
             confusion_matrix[winner_class(outputs[i])][int(targets[i])] += 1
 
-    # Normalize
     total = np.sum(confusion_matrix)
-    # for i in range(10):
-    #     ratio = np.sum(confusion_matrix[i])
-    #     confusion_matrix[i] *= 100 / ratio
 
     return np.around(confusion_matrix), int(total)

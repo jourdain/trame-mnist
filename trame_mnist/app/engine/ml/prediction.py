@@ -1,7 +1,6 @@
 import random
 import numpy as np
 import torchvision
-from pathlib import Path
 
 from .common import DATA_DIR, get_model, has_trained_model
 
