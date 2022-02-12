@@ -16,9 +16,11 @@ For the Python layer it is recommended to use `conda <https://docs.conda.io/en/l
 conda setup on macOS
 ^^^^^^^^^^^^^^^^^^^^^
 
+Go to `conda documentation <https://docs.conda.io/en/latest/miniconda.html>`_ for your OS
+
 .. code-block:: console
 
-    brew install miniforge     # Go to conda for your OS
+    brew install miniforge
     conda init zsh
 
 venv setup for AI
