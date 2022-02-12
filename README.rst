@@ -53,11 +53,11 @@ Run the application
 |image_1| |image_2| |image_3|
 
 .. |image_1| image:: https://raw.githubusercontent.com/jourdain/trame-mnist/master/documentation/gallery/trame-mnist-02.jpg
-  :width: 30%
+  :width: 32%
 .. |image_2| image:: https://raw.githubusercontent.com/jourdain/trame-mnist/master/documentation/gallery/trame-mnist-03.jpg
-  :width: 30%
+  :width: 32%
 .. |image_3| image:: https://raw.githubusercontent.com/jourdain/trame-mnist/master/documentation/gallery/trame-mnist-04.jpg
-  :width: 30%
+  :width: 32%
 
 Deploying new version
 ---------------------
