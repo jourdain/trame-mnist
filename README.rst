@@ -11,14 +11,14 @@ Example application using **trame** for exploring MNIST dataset in the context o
 Installing
 ----------
 
-For the Python layer it is recommended to use conda to properly install the various ML packages.
+For the Python layer it is recommended to use `conda <https://docs.conda.io/en/latest/miniconda.html>`_ to properly install the various ML packages.
 
 conda setup
 ^^^^^^^^^^^^
 
 .. code-block:: console
 
-    brew install miniforge
+    brew install miniforge     # for macOS but `read documentation <https://docs.conda.io/en/latest/miniconda.html>`_ for other OS
     conda init zsh
 
 venv setup for AI
