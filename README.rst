@@ -62,16 +62,7 @@ Running the application
 .. |image_3| image:: https://raw.githubusercontent.com/jourdain/trame-mnist/master/documentation/gallery/trame-mnist-04.jpg
   :width: 32%
 
+License
+--------
 
-Publishing to PyPI
--------------------
-
-This assume you have **twine** available within your python environment and updated the package version inside **setup.cfg**
-
-.. code-block:: console
-
-    rm -rf dist build
-
-    python setup.py sdist bdist_wheel
-    twine check dist/*
-    twine upload dist/*
+**trame-mnist** is distributed under the OSI-approved BSD 3-clause License.
