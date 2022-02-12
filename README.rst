@@ -13,16 +13,16 @@ Installing
 
 For the Python layer it is recommended to use conda to properly install the various ML packages.
 
-macOS conda setup
-^^^^^^^^^^^^^^^^^
+conda setup
+^^^^^^^^^^^^
 
 .. code-block:: console
 
     brew install miniforge
     conda init zsh
 
-venv creation for AI
-^^^^^^^^^^^^^^^^^^^^
+venv setup for AI
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: console
 
@@ -42,7 +42,8 @@ venv creation for AI
 
 
 
-Run the application
+Running the application
+------------------------
 
 .. code-block:: console
 
@@ -59,8 +60,9 @@ Run the application
 .. |image_3| image:: https://raw.githubusercontent.com/jourdain/trame-mnist/master/documentation/gallery/trame-mnist-04.jpg
   :width: 32%
 
-Deploying new version
----------------------
+
+Publishing to PyPI
+-------------------
 
 This assume you have **twine** available within your python environment and updated the package version inside **setup.cfg**
 
